@@ -15,7 +15,9 @@ const config = {
   SHOW_PROGRESS: true,
   PROGRESS_INTERVAL: 1100,
   FILE_NAME_PREFIX: "Cases",
-  INCLUDE_RECORD_COUNT_IN_FILE_NAME: true
+  INCLUDE_RECORD_COUNT_IN_FILE_NAME: true,
+  DYNAMIC_ATTRS: 0,
+  UNIQUE_VALUES_FOR_DYNAMIC_ATTRS: 10
 };
 
 function loadAndSetUserConfigurations() {
@@ -62,14 +64,18 @@ function loadAndSetUserConfigurations() {
       config.FILE_NAME_PREFIX = nextArg;
     } else if (arg === "-verbosename" && i + 1 < args.length) {
       config.INCLUDE_RECORD_COUNT_IN_FILE_NAME = (nextArg.toLowerCase() == "true")
-    } 
+    } else if (arg === "-dynamicattrs" && i + 1 < args.length) {
+      config.DYNAMIC_ATTRS = parseFloat(nextArg);
+    } else if (arg === "-uniquevalues" && i + 1 < args.length) {
+           config.UNIQUE_VALUES_FOR_DYNAMIC_ATTRS = parseFloat(nextArg);
+    }
   }
 }
 
 function printHelp() {
   console.log("\nUsage:");
   console.log(
-    "node app.js -cases [value] -timeframe [value] -format [value] -sqlbatchsize [value] -minevents [value] -maxevents [value] -mindays [value] -maxdays [value] -minhours [value] -maxhours [value] -minminutes [value] -maxminutes [value] -progress [value] -progressinterval [value]\n"
+    "node app.js -cases [value] -timeframe [value] -format [value] -sqlbatchsize [value] -minevents [value] -maxevents [value] -mindays [value] -maxdays [value] -minhours [value] -maxhours [value] -minminutes [value] -maxminutes [value] -progress [value] -progressinterval [value] -dynamicattrs [value] -uniquevalues [value]\n"
   );
   console.log(
     `-cases: The number of cases to generate. (Default: ${config.NUMBER_OF_CASES})`
@@ -116,9 +122,14 @@ function printHelp() {
   console.log(
     `-prefix: The prefix for the name of the generated files. (Default: ${config.FILE_NAME_PREFIX})`
   );
-
   console.log(
     `-verbosename: Whether to include the record count in the "-all" file name. (Default: ${config.INCLUDE_RECORD_COUNT_IN_FILE_NAME})`
+  );
+  console.log(
+    `-dynamicattrs: Number of dynamically generated case attributes. (Default: ${config.DYNAMIC_ATTRS})`
+  );
+  console.log(
+    `-uniquevalues: Number of unique values for each dynamically generated case attribute. (Default: ${config.UNIQUE_VALUES_FOR_DYNAMIC_ATTRS})`
   );
   console.log("\n");
 }

@@ -8,8 +8,35 @@ const _vocabulary = {
   events: null
 };
 
-function processVocabulary() {
+function processVocabulary(dynamicCaseAttrs) {
   const items = parseVocabulary();
+
+  // Inject dynamic attributes to the vocabulary json
+  Object.entries(dynamicCaseAttrs).forEach(([key, value]) => {
+    // Add new column to the schema
+    const newColumn = {
+               name: key.toLowerCase(),
+               display_name: key.replace(/_/g,""),
+               type: "varchar(50)",
+               nullable: true
+             };
+    items["__schema__"]["cases"]["columns"].push(newColumn);
+
+    // Calculate weight for each value
+    let weight = 1;
+    if (value.length > 0) {
+      weight = 1/value.length;
+    }
+
+    // Create a dict with values as keys as weights as values
+    const valuesWithWeight = {}
+    for (let i = 0; i < value.length; i++) {
+        valuesWithWeight[value[i]] = weight;
+    }
+
+    // Add the dynamic attribute and weighted values to vocabulary json object
+    items[key] = valuesWithWeight
+  })
 
   for (const key in items) {
     if (key === "__schema__") {

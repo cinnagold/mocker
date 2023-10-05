@@ -123,4 +123,17 @@ function valueToForeignKey(value, table) {
   return vocabulary.data[table][value];
 }
 
-module.exports = { generateCases, generateEvents };
+function generateDynamicCaseAttrs(numOfAttrs, numOfUniqueValues){
+  const dynamicDict = {};
+  const str = "Dynamic_";
+  for (let i=1; i<=numOfAttrs; i++) {
+    const uniqueWords = new Set();
+    while (uniqueWords.size < numOfUniqueValues) {
+      uniqueWords.add(faker.word.sample({ length: { min: 8, max: 15 }, strategy: "closest" }));
+    }
+    dynamicDict[`${str}${i}`] = Array.from(uniqueWords);
+  }
+  return dynamicDict;
+}
+
+module.exports = { generateCases, generateEvents, generateDynamicCaseAttrs };
