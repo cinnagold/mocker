@@ -1,4 +1,6 @@
 const fs = require("fs");
+const { config } = require('./config');
+const { faker } = require("@faker-js/faker");
 
 const _vocabulary = {
   schema: {},
@@ -8,35 +10,12 @@ const _vocabulary = {
   events: null
 };
 
-function processVocabulary(dynamicCaseAttrs) {
+function processVocabulary() {
   const items = parseVocabulary();
 
-  // Inject dynamic attributes to the vocabulary json
-  Object.entries(dynamicCaseAttrs).forEach(([key, value]) => {
-    // Add new column to the schema
-    const newColumn = {
-               name: key.toLowerCase(),
-               display_name: key.replace(/_/g,""),
-               type: "varchar(50)",
-               nullable: true
-             };
-    items["__schema__"]["cases"]["columns"].push(newColumn);
-
-    // Calculate weight for each value
-    let weight = 1;
-    if (value.length > 0) {
-      weight = 1/value.length;
-    }
-
-    // Create a dict with values as keys as weights as values
-    const valuesWithWeight = {}
-    for (let i = 0; i < value.length; i++) {
-        valuesWithWeight[value[i]] = weight;
-    }
-
-    // Add the dynamic attribute and weighted values to vocabulary json object
-    items[key] = valuesWithWeight
-  })
+  if(config.DYNAMIC_ATTRS > 0) {
+     includeDynamicAttributes(items);
+  }
 
   for (const key in items) {
     if (key === "__schema__") {
@@ -140,6 +119,49 @@ function parseVocabulary() {
 
 function getVocabulary() {
   return _vocabulary;
+}
+
+function generateDynamicCaseAttrs(numOfAttrs, numOfUniqueValues){
+  const dynamicDict = {};
+  const str = "Dynamic_";
+  for (let i = 1; i <= numOfAttrs; i++) {
+    const uniqueWords = new Set();
+    while (uniqueWords.size < numOfUniqueValues) {
+      uniqueWords.add(faker.word.sample({ length: { min: 8, max: 15 }, strategy: "closest" }));
+    }
+    dynamicDict[`${str}${i}`] = Array.from(uniqueWords);
+  }
+  return dynamicDict;
+}
+
+function includeDynamicAttributes(items) {
+  const dynamicCaseAttrs = generateDynamicCaseAttrs(config.DYNAMIC_ATTRS, config.UNIQUE_VALUES_FOR_DYNAMIC_ATTRS);
+
+  Object.entries(dynamicCaseAttrs).forEach(([key, value]) => {
+    // Add new columns into the schema
+    const newColumn = {
+      name: key.toLowerCase(),
+      display_name: key.replace(/_/g,""),
+      type: "varchar(50)",
+      nullable: true
+    };
+    items["__schema__"]["cases"]["columns"].push(newColumn);
+
+    // Calculate weight for each value
+    let weight = 1;
+    if (value.length > 0) {
+      weight = 1 / value.length;
+    }
+
+    // Create a dict with attr values as keys and weights as values
+    const valuesWithWeight = {}
+    for (let i = 0; i < value.length; i++) {
+      valuesWithWeight[value[i]] = weight;
+    }
+
+    // Add the dynamic attribute and weighted values to vocabulary json object
+    items[key] = valuesWithWeight
+  })
 }
 
 module.exports = { processVocabulary, getRandomString, getVocabulary };
