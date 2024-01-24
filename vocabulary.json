@@ -238,15 +238,79 @@
         "Closed": 1
     },
     "Submitted": {
-        "Submitted": 0.05,
-        "Backlog": 0.5,
-        "In Progress": 0.2,
-        "Under Code Review": 0.05,
-        "Code Complete": 0.05,
-        "QE Review": 0.05,
-        "PO Review": 0.05,
+        "Submitted": 0.0,
+        "Backlog": 0.0,
+        "In Progress": 0.0,
+        "Under Code Review": 0.0,
+        "Code Complete": 0.0,
+        "QE Review": 0.0,
+        "PO Review": 0.0,
         "Ready for Merge": 0.0,
-        "Closed": 0.05
+        "Closed": 0.0,
+        "Random_Step_One": 0.25,
+        "Random_Step_Two": 0.25,
+        "Random_Step_Three": 0.25,
+        "Random_Step_Four": 0.25
+    },
+    "Random_Step_One": {
+        "Submitted": 0.0,
+        "Backlog": 0.0,
+        "In Progress": 0.0,
+        "Under Code Review": 0.0,
+        "Code Complete": 0.0,
+        "QE Review": 0.0,
+        "PO Review": 0.0,
+        "Ready for Merge": 0.0,
+        "Closed": 0.0,
+        "Random_Step_One": 0.25,
+        "Random_Step_Two": 0.25,
+        "Random_Step_Three": 0.25,
+        "Random_Step_Four": 0.25
+    },
+    "Random_Step_Two": {
+        "Submitted": 0.00,
+        "Backlog": 0.0,
+        "In Progress": 0.0,
+        "Under Code Review": 0.0,
+        "Code Complete": 0.0,
+        "QE Review": 0.0,
+        "PO Review": 0.0,
+        "Ready for Merge": 0.0,
+        "Closed": 0.0,
+        "Random_Step_One": 0.25,
+        "Random_Step_Two": 0.25,
+        "Random_Step_Three": 0.25,
+        "Random_Step_Four": 0.25
+    },
+    "Random_Step_Three": {
+        "Submitted": 0.00,
+        "Backlog": 0.0,
+        "In Progress": 0.0,
+        "Under Code Review": 0.0,
+        "Code Complete": 0.0,
+        "QE Review": 0.0,
+        "PO Review": 0.0,
+        "Ready for Merge": 0.0,
+        "Closed": 0.0,
+        "Random_Step_One": 0.25,
+        "Random_Step_Two": 0.25,
+        "Random_Step_Three": 0.25,
+        "Random_Step_Four": 0.25
+    },
+    "Random_Step_Four": {
+        "Submitted": 0.0,
+        "Backlog": 1.0,
+        "In Progress": 0.0,
+        "Under Code Review": 0.0,
+        "Code Complete": 0.0,
+        "QE Review": 0.0,
+        "PO Review": 0.0,
+        "Ready for Merge": 0.0,
+        "Closed": 0.0,
+        "Random_Step_One": 0.0,
+        "Random_Step_Two": 0.0,
+        "Random_Step_Three": 0.0,
+        "Random_Step_Four": 0.0
     },
     "Backlog": {
         "Submitted": 0.05,
@@ -257,7 +321,11 @@
         "QE Review": 0.05,
         "PO Review": 0.05,
         "Ready for Merge": 0.05,
-        "Closed": 0.1
+        "Closed": 0.1,
+        "Random_Step_One": 0.0,
+        "Random_Step_Two": 0.0,
+        "Random_Step_Three": 0.0,
+        "Random_Step_Four": 0.0
     },
     "In Progress": {
         "Submitted": 0.05,
@@ -268,7 +336,11 @@
         "QE Review": 0.05,
         "PO Review": 0.05,
         "Ready for Merge": 0.05,
-        "Closed": 0.1
+        "Closed": 0.1,
+        "Random_Step_One": 0.0,
+        "Random_Step_Two": 0.0,
+        "Random_Step_Three": 0.0,
+        "Random_Step_Four": 0.0
     },
     "Under Code Review": {
         "Submitted": 0.05,
@@ -279,7 +351,11 @@
         "QE Review": 0.05,
         "PO Review": 0.05,
         "Ready for Merge": 0.05,
-        "Closed": 0.1
+        "Closed": 0.1,
+        "Random_Step_One": 0.0,
+        "Random_Step_Two": 0.0,
+        "Random_Step_Three": 0.0,
+        "Random_Step_Four": 0.0
     },
     "Code Complete": {
         "Submitted": 0.05,
@@ -290,7 +366,11 @@
         "QE Review": 0.3,
         "PO Review": 0.05,
         "Ready for Merge": 0.05,
-        "Closed": 0.05
+        "Closed": 0.05,
+        "Random_Step_One": 0.0,
+        "Random_Step_Two": 0.0,
+        "Random_Step_Three": 0.0,
+        "Random_Step_Four": 0.0
     },
     "QE Review": {
         "Submitted": 0.05,
@@ -301,7 +381,11 @@
         "QE Review": 0.05,
         "PO Review": 0.2,
         "Ready for Merge": 0.05,
-        "Closed": 0.05
+        "Closed": 0.05,
+        "Random_Step_One": 0.0,
+        "Random_Step_Two": 0.0,
+        "Random_Step_Three": 0.0,
+        "Random_Step_Four": 0.0
     },
     "PO Review": {
         "Submitted": 0.05,
@@ -312,7 +396,11 @@
         "QE Review": 0.05,
         "PO Review": 0.0,
         "Ready for Merge": 0.5,
-        "Closed": 0.05
+        "Closed": 0.05,
+        "Random_Step_One": 0.0,
+        "Random_Step_Two": 0.0,
+        "Random_Step_Three": 0.0,
+        "Random_Step_Four": 0.0
     },
     "Ready for Merge": {
         "Submitted": 0.0,
@@ -323,7 +411,11 @@
         "QE Review": 0.05,
         "PO Review": 0.05,
         "Ready for Merge": 0.0,
-        "Closed": 0.7
+        "Closed": 0.7,
+        "Random_Step_One": 0.0,
+        "Random_Step_Two": 0.0,
+        "Random_Step_Three": 0.0,
+        "Random_Step_Four": 0.0
     },
     "ACTOR": {
         "None": 0.2,
@@ -814,6 +906,10 @@
         "QE Review": 0.05,
         "PO Review": 0.05,
         "Ready for Merge": 0.0,
-        "Closed": 0.7
+        "Closed": 0.6,
+        "Random_Step_One": 0.01,
+        "Random_Step_Two": 0.01,
+        "Random_Step_Three": 0.01,
+        "Random_Step_Four": 0.01
     }
 }
