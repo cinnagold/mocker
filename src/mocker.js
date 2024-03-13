@@ -1,7 +1,7 @@
 const { loadAndSetUserConfigurations, config } = require('./config');
 const { processVocabulary } = require('./vocabulary');
 const { generateCases, generateEvents } = require('./data');
-const { saveToCSV, writeFile } = require('./output');
+const { saveToCSV, writeFile, deleteFile } = require('./output');
 const { generateSchemaSql, generateSqlInsert } = require('./sql_generator');
 const util = require('./util');
 const pluralize = require('pluralize');
@@ -33,11 +33,12 @@ async function main() {
 }
 
 function saveToSql(vocabulary, cases, events) {
+  deleteFile(`out/${fileNameForCombined()}.sql`);
   let combinedFile = '';
 
   const schema = generateSchemaSql(vocabulary.schema);
   writeFile('out/schema.sql', schema);
-  combinedFile += schema + '\n\n';
+  appendToCombinedSqlFile(schema + '\n\n');
 
   //"Lookup data"
   if (vocabulary.data) {
@@ -52,19 +53,21 @@ function saveToSql(vocabulary, cases, events) {
 
       const sqlInsertsData = generateSqlInsert(data, vocabulary.schema.data.find(e => e.lookup_for == table));
       writeFile(`out/${fileNameForData(table)}.sql`, sqlInsertsData);
-      combinedFile += sqlInsertsData + '\n\n';
+      appendToCombinedSqlFile(sqlInsertsData + '\n\n');
     }
   }
 
   const sqlInsertsCases = generateSqlInsert(cases, vocabulary.schema.cases);
   writeFile(`out/${fileNameForCases()}.sql`, sqlInsertsCases);
-  combinedFile += sqlInsertsCases + '\n\n';
+  appendToCombinedSqlFile(sqlInsertsCases + '\n\n');
 
   const sqlInsertsEvents = generateSqlInsert(events, vocabulary.schema.events);
   writeFile(`out/${fileNameForEvents(events.length)}.sql`, sqlInsertsEvents);
-  combinedFile += sqlInsertsEvents + '\n\n';
+  appendToCombinedSqlFile(sqlInsertsEvents + '\n\n');
+}
 
-  writeFile(`out/${fileNameForCombined()}.sql`, combinedFile);
+function appendToCombinedSqlFile(data) {
+  writeFile(`out/${fileNameForCombined()}.sql`, data, { flag: 'a'});
 }
 
 function fileNameForCombined() {

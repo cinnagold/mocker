@@ -13,12 +13,20 @@ function saveToCSV(filename, data) {
   writeFile(filename, csv);
 }
 
-function writeFile(filename, data) {
+function writeFile(filename, data, opt) {
   const dir = path.dirname(filename);
   if (!fs.existsSync(dir)) {
     fs.mkdirSync(dir, { recursive: true });
   }
-  fs.writeFileSync(filename, data);
+  fs.writeFileSync(filename, data, opt);
 }
 
-module.exports = { saveToCSV, writeFile };
+function deleteFile(filename) {
+  fs.unlink(filename, (err) => {
+    if (err) {
+      console.error(`Error deleting file: ${err}`);
+    }
+  });
+}
+
+module.exports = { saveToCSV, writeFile, deleteFile };
