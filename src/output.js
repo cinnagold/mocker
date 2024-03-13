@@ -22,11 +22,17 @@ function writeFile(filename, data, opt) {
 }
 
 function deleteFile(filename) {
-  fs.unlink(filename, (err) => {
+  fs.access(filename, fs.constants.F_OK, (err) => {
     if (err) {
-      console.error(`Error deleting file: ${err}`);
+        return; //File doesn't exist. Ignore silently
     }
-  });
+
+    fs.unlink(filename, (err) => {
+        if (err) {
+            console.error(`Error deleting file: ${err}`);
+        }
+    });
+});
 }
 
 module.exports = { saveToCSV, writeFile, deleteFile };
