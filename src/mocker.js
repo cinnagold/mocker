@@ -18,8 +18,8 @@ async function main() {
   }
 
   if (config.OUTPUT_FORMAT === 'csv') {
-    saveToCSV(`out/${fileNameForCases()}.csv`, cases);
-    saveToCSV(`out/${fileNameForEvents(events.length)}.csv`, events);
+    await saveToCSV(`out/${fileNameForCases()}.csv`, cases);
+    await saveToCSV(`out/${fileNameForEvents(events.length)}.csv`, events);
   } else if (config.OUTPUT_FORMAT === 'sql') {
     saveToSql(vocabulary, cases, events);
   } else {
@@ -32,12 +32,12 @@ async function main() {
   }
 }
 
-function saveToSql(vocabulary, cases, events) {
+async function saveToSql(vocabulary, cases, events) {
   deleteFile(`out/${fileNameForCombined()}.sql`);
   let combinedFile = '';
 
   const schema = generateSchemaSql(vocabulary.schema);
-  writeFile('out/schema.sql', schema);
+  await writeFile('out/schema.sql', schema);
   appendToCombinedSqlFile(schema + '\n\n');
 
   //"Lookup data"
@@ -52,22 +52,24 @@ function saveToSql(vocabulary, cases, events) {
       }
 
       const sqlInsertsData = generateSqlInsert(data, vocabulary.schema.data.find(e => e.lookup_for == table));
-      writeFile(`out/${fileNameForData(table)}.sql`, sqlInsertsData);
+      await writeFile(`out/${fileNameForData(table)}.sql`, sqlInsertsData);
       appendToCombinedSqlFile(sqlInsertsData + '\n\n');
     }
   }
 
   const sqlInsertsCases = generateSqlInsert(cases, vocabulary.schema.cases);
-  writeFile(`out/${fileNameForCases()}.sql`, sqlInsertsCases);
-  appendToCombinedSqlFile(sqlInsertsCases + '\n\n');
+  await writeFile(`out/${fileNameForCases()}.sql`, sqlInsertsCases);
+  appendToCombinedSqlFile(sqlInsertsCases);
+  appendToCombinedSqlFile('\n');
 
   const sqlInsertsEvents = generateSqlInsert(events, vocabulary.schema.events);
-  writeFile(`out/${fileNameForEvents(events.length)}.sql`, sqlInsertsEvents);
-  appendToCombinedSqlFile(sqlInsertsEvents + '\n\n');
+  await writeFile(`out/${fileNameForEvents(events.length)}.sql`, sqlInsertsEvents);
+  appendToCombinedSqlFile(sqlInsertsEvents);
+  appendToCombinedSqlFile('\n');
 }
 
-function appendToCombinedSqlFile(data) {
-  writeFile(`out/${fileNameForCombined()}.sql`, data, { flag: 'a'});
+async function appendToCombinedSqlFile(data) {
+  await writeFile(`out/${fileNameForCombined()}.sql`, data, { flags: 'a'});
 }
 
 function fileNameForCombined() {
