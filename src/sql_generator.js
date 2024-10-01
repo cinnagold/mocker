@@ -29,7 +29,7 @@ function generateSqlInsert(data, schema) {
     statements.push(sql);
   }
 
-  return statements.join("\n");
+  return statements;
 }
 
 function generateDropTableSql(table) {
