@@ -132,7 +132,7 @@ function valueToForeignKey(value, table) {
   return vocabulary.data[table][value];
 }
 
-/* This function generates a variant, which is defined as a collection of sequences. 
+/* This function generates a variant, which is defined as a collection of sequences.
    Each sequence consists of a pair of events. */
 function generateEventVariant() {
   // Check if we can create more variants based on MAX_VARIANTS configuration
