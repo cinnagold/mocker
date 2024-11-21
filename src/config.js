@@ -5,7 +5,7 @@ const config = {
   OUTPUT_FORMAT: "csv",
   BATCH_SIZE_INSERT_SQL: 1000,
   MIN_EVENTS: 3,
-  MAX_EVENTS: 7,
+  MAX_EVENTS: 10,
   MIN_DAYS_BETWEEN_EVENTS: 1,
   MAX_DAYS_BETWEEN_EVENTS: 3,
   MIN_HOURS_BETWEEN_EVENTS: 1,
@@ -17,7 +17,10 @@ const config = {
   FILE_NAME_PREFIX: "Cases",
   INCLUDE_RECORD_COUNT_IN_FILE_NAME: true,
   DYNAMIC_ATTRS: 0,
-  UNIQUE_VALUES_FOR_DYNAMIC_ATTRS: 10
+  UNIQUE_VALUES_FOR_DYNAMIC_ATTRS: 10,
+  MAX_VARIANTS: -1,
+  MAX_SEQUENCES: -1,
+  SHOW_SUMMARY: true
 };
 
 function loadAndSetUserConfigurations() {
@@ -67,7 +70,13 @@ function loadAndSetUserConfigurations() {
     } else if (arg === "-dynamicattrs" && i + 1 < args.length) {
       config.DYNAMIC_ATTRS = parseFloat(nextArg);
     } else if (arg === "-uniquevalues" && i + 1 < args.length) {
-           config.UNIQUE_VALUES_FOR_DYNAMIC_ATTRS = parseFloat(nextArg);
+      config.UNIQUE_VALUES_FOR_DYNAMIC_ATTRS = parseFloat(nextArg);
+    } else if (arg === "-maxvariants" && i + 1 < args.length) {
+      config.MAX_VARIANTS = parseFloat(nextArg);
+    } else if (arg === "-maxsequences" && i + 1 < args.length) {
+      config.MAX_SEQUENCES = parseFloat(nextArg);
+    } else if (arg === "-summary" && i + 1 < args.length) {
+      config.SHOW_SUMMARY = (nextArg.toLowerCase() == "true")
     }
   }
 }
@@ -130,6 +139,15 @@ function printHelp() {
   );
   console.log(
     `-uniquevalues: Number of unique values for each dynamically generated case attribute. (Default: ${config.UNIQUE_VALUES_FOR_DYNAMIC_ATTRS})`
+  );
+  console.log(
+    `-maxvariants: Maximum number of unique variants. (Default: None)`
+  );
+  console.log(
+    `-maxsequences: Maximum number of unique event sequences. (Default: None)`
+  );
+  console.log(
+    `-summary: Display data summary on the console. (Default: ${config.SHOW_SUMMARY})`
   );
   console.log("\n");
 }

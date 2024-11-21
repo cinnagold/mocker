@@ -4,6 +4,11 @@ const { getRandomString, getVocabulary } = require("./vocabulary");
 const { config } = require("./config");
 const { showProgress } = require("./progress");
 
+const uniqueVariants = new Set();
+const uniqueSequences = new Set();
+const variantsMap = {};
+let variantsCount = 0;
+
 function generateCases(numCases) {
   const cases = [];
   let vocabulary = getVocabulary();
@@ -34,8 +39,6 @@ function generateCases(numCases) {
 }
 
 function generateEvents(cases) {
-  const initialEvent = getVocabulary().initialEvent;
-  const finalEvent = getVocabulary().finalEvent;
   const transitions = [];
   const numCases = cases.length;
 
@@ -52,21 +55,9 @@ function generateEvents(cases) {
     const startDate = faker.date.past({ years: config.TIMEFRAME_IN_YEARS });
     let currentDate = moment(startDate);
 
-    let eventName,
-      previousEvent;
-
-    for (let i = 0; i < numTransitions; i++) {
+    const variant = generateEventVariant()
+    for (const eventName of variant) {
       const event = {};
-      if (i === 0) {
-        eventName = initialEvent;
-      } else if (i === numTransitions - 1) {
-        eventName = finalEvent;
-      } else {
-        eventName = getRandomString(previousEvent);
-      }
-
-      previousEvent = eventName;
-
       vocabulary.schema.events.columns.forEach((field) => {
         if (field.primary_key) {
           event[field.display_name] = event._id = eventId++;
@@ -86,9 +77,6 @@ function generateEvents(cases) {
       });
 
       transitions.push(event);
-
-      if (eventName === finalEvent) break;
-
       currentDate.add({
         days: faker.number.int({
           min: config.MIN_DAYS_BETWEEN_EVENTS,
@@ -115,12 +103,104 @@ function generateEvents(cases) {
     showProgress(1 * 100, (text = "Generating events"));
     process.stdout.write("\n");
   }
+
+  const stats = {
+    cases: numCases,
+    events: transitions.length,
+    variants: variantsCount,
+    sequences: uniqueSequences.size
+  };
+  if (config.SHOW_SUMMARY) {
+    console.log("Jira Tickets Summary: {");
+    Object.entries(stats).forEach(([key, value]) => {
+      console.log(`  ${key}: \x1b[33m${value}\x1b[0m`);
+    });
+    console.log("}");
+  }
+  if (config.MAX_VARIANTS > 0 && variantsCount < config.MAX_VARIANTS) {
+    console.warn(`WARN: Number of generated variants (${variantsCount}) did not reach the specified maximum (${config.MAX_VARIANTS}).`);
+  }
+  if (config.MAX_SEQUENCES > 0 && uniqueSequences.size < config.MAX_SEQUENCES) {
+    console.warn(`WARN: Number of generated sequences (${uniqueSequences.size}) did not reach the specified maximum (${config.MAX_SEQUENCES}).`);
+  }
+
   return transitions;
 }
 
 function valueToForeignKey(value, table) {
   const vocabulary = getVocabulary();
   return vocabulary.data[table][value];
+}
+
+/* This function generates a variant, which is defined as a collection of sequences. 
+   Each sequence consists of a pair of events. */
+function generateEventVariant() {
+  // Check if we can create more variants based on MAX_VARIANTS configuration
+  if (uniqueVariants.size < config.MAX_VARIANTS || config.MAX_VARIANTS < 0) {
+    const initialEvent = getRandomString("__initial_events__");
+    const finalEvents = getVocabulary().finalEvents;
+    const numTransitions = faker.number.int({
+      min: config.MIN_EVENTS,
+      max: config.MAX_EVENTS,
+    });
+
+    const variant = [initialEvent];
+    let previousEvent = initialEvent;
+
+    for (let i = 1; i < numTransitions; i++) {
+      let eventName;
+      // If we've reached the maximum allowed unique sequences, reuse existing ones
+      if (uniqueSequences.size >= config.MAX_SEQUENCES && config.MAX_SEQUENCES > 0) {
+        // Find all sequences that start from previousEvent
+        let possibleNextEvents = Array.from(uniqueSequences)
+          .filter(seq => seq.startsWith(`${previousEvent}->`))
+          .map(seq => seq.split("->")[1]); // Extract the end events
+
+        // If we're on the last transition, filter possibleNextEvents to include only final events
+        if (i === numTransitions - 1) {
+          possibleNextEvents = possibleNextEvents.filter(event => event in finalEvents);
+        }
+
+        // If possibleNextEvents is empty, fall back to normal sequence generation.
+        // This may result in num of sequences to exceed MAX_SEQUENCES, which is OK!
+        if (possibleNextEvents.length > 0) {
+          eventName = getRandomString(previousEvent, possibleNextEvents);
+        } else {
+          if (i === numTransitions - 1) {
+            eventName = getRandomString(previousEvent, Object.keys(finalEvents));
+          } else {
+            eventName = getRandomString(previousEvent);
+          }
+          uniqueSequences.add(`${previousEvent}->${eventName}`);
+        }
+      } else {
+        // Generate a completely new sequence (when MAX_SEQUENCES limit not reached)
+        if (i === numTransitions - 1) {
+          eventName = getRandomString(previousEvent, Object.keys(finalEvents));
+        } else {
+          eventName = getRandomString(previousEvent);
+        }
+        uniqueSequences.add(`${previousEvent}->${eventName}`);
+      }
+
+      variant.push(eventName);
+      previousEvent = eventName;
+
+      if (eventName in finalEvents) break;
+    }
+
+    const variantStr = variant.join("->");
+    if (!uniqueVariants.has(variantStr)) {
+      uniqueVariants.add(variantStr);
+      variantsMap[variantsCount++] = variant;
+    }
+
+    return variant;
+  } else {
+    // If maximum variants are reached, return a randomly selected pre-generated variant
+    const randomIndex = Math.floor(Math.random() * variantsCount);
+    return variantsMap[randomIndex];
+  }
 }
 
 module.exports = { generateCases, generateEvents };

@@ -21,7 +21,7 @@ async function main() {
     await saveToCSV(`out/${fileNameForCases()}.csv`, cases);
     await saveToCSV(`out/${fileNameForEvents(events.length)}.csv`, events);
   } else if (config.OUTPUT_FORMAT === 'sql') {
-    saveToSql(vocabulary, cases, events);
+    await saveToSql(vocabulary, cases, events);
   } else {
     throw new Error(
       `Invalid format: "${config.OUTPUT_FORMAT}". To see a list of valid formats, please rerun with the -help option`
