@@ -52,7 +52,7 @@ function generateEvents(cases) {
     caseNumber++;
 
     const vocabulary = getVocabulary();
-    const startDate = faker.date.past({ years: config.TIMEFRAME_IN_YEARS });
+    const startDate = getStartDate(caseNumber, numCases);
     let currentDate = moment(startDate);
 
     const variant = generateEventVariant()
@@ -200,6 +200,14 @@ function generateEventVariant() {
     // If maximum variants are reached, return a randomly selected pre-generated variant
     const randomIndex = Math.floor(Math.random() * variantsCount);
     return variantsMap[randomIndex];
+  }
+}
+
+function getStartDate(currentCase, totalCases) {
+  if (currentCase <= (config.RECENT_EVENT_FREQUENCY / 100) * totalCases) {
+    return faker.date.recent();
+  } else {
+    return faker.date.past({ years: config.TIMEFRAME_IN_YEARS });
   }
 }
 
