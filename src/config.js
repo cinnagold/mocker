@@ -12,6 +12,7 @@ const config = {
   MAX_HOURS_BETWEEN_EVENTS: 3,
   MIN_MINUTES_BETWEEN_EVENTS: 1,
   MAX_MINUTES_BETWEEN_EVENTS: 3,
+  RECENT_EVENT_FREQUENCY: 0,
   SHOW_PROGRESS: true,
   PROGRESS_INTERVAL: 1100,
   FILE_NAME_PREFIX: "Cases",
@@ -22,6 +23,65 @@ const config = {
   MAX_SEQUENCES: -1,
   SHOW_SUMMARY: true
 };
+
+const ArgumentTypes = {
+  FLOAT: "float",
+  STRING: "string",
+  BOOLEAN: "boolean",
+  LCSTRING: "lowercasestring"
+}
+
+class ConfigDefinition {
+  constructor(configName, argumentName, type, help) {
+    this.configName = configName;
+    this.argumentName = argumentName;
+    this.type = type;
+    this.help = help;
+  }
+
+  printHelpMessage() {
+    console.log(
+      `${this.argumentName}: ${this.help} (Default: ${config[this.configName] < 0 ? "None" : config[this.configName]})\n`
+    );
+  }
+
+  parse(value) {
+    if (this.type == ArgumentTypes.FLOAT) {
+      return parseFloat(value);
+    } else if (this.type == ArgumentTypes.BOOLEAN) {
+      return value.toLowerCase() == "true";
+    } else if (this.type == ArgumentTypes.STRING) {
+      return value;
+    } else if (this.type == ArgumentTypes.LCSTRING) {
+      return value.toLowerCase();
+    }
+  }
+}
+
+const configDefinitions = [
+  new ConfigDefinition("NUMBER_OF_CASES", "-cases", ArgumentTypes.FLOAT, "The number of cases to generate."),
+  new ConfigDefinition("TIMEFRAME_IN_YEARS", "-timeframe", ArgumentTypes.FLOAT, "The amount of years to use as the timeframe of event dates."),
+  new ConfigDefinition("OUTPUT_FORMAT", "-format", ArgumentTypes.LCSTRING, "The format to use for the output (csv or sql)."),
+  new ConfigDefinition("BATCH_SIZE_INSERT_SQL", "-sqlbatchsize", ArgumentTypes.FLOAT, "The number rows to include with each SQL INSERT statement."),
+  new ConfigDefinition("MIN_EVENTS", "-minevents", ArgumentTypes.FLOAT, "The minimum number of events to create for each case."),
+  new ConfigDefinition("MAX_EVENTS", "-maxevents", ArgumentTypes.FLOAT, "The maximum number of events to create for each case."),
+  new ConfigDefinition("MIN_DAYS_BETWEEN_EVENTS", "-mindays", ArgumentTypes.FLOAT, "The minimum number of days between events."),
+  new ConfigDefinition("MAX_DAYS_BETWEEN_EVENTS", "-maxdays", ArgumentTypes.FLOAT, "The maximum number of days between events."),
+  new ConfigDefinition("MIN_HOURS_BETWEEN_EVENTS", "-minhours", ArgumentTypes.FLOAT, "The minimum number of hours between events."),
+  new ConfigDefinition("MAX_HOURS_BETWEEN_EVENTS", "-maxhours", ArgumentTypes.FLOAT, "The maximum number of hours between events."),
+  new ConfigDefinition("MIN_MINUTES_BETWEEN_EVENTS", "-minminutes", ArgumentTypes.FLOAT, "The minimum number of minutes between events."),
+  new ConfigDefinition("MAX_MINUTES_BETWEEN_EVENTS", "-maxminutes", ArgumentTypes.FLOAT, "The maximum number of minutes between events."),
+  new ConfigDefinition("RECENT_EVENT_FREQUENCY", "-recentfrequency", ArgumentTypes.FLOAT, "The percentage [0,100] of events to generate within at least the past day. Should usually be accompanied by -mindays: 0."),
+  new ConfigDefinition("SHOW_PROGRESS", "-progress", ArgumentTypes.BOOLEAN, "Enable/Disable a progress indicator."),
+  new ConfigDefinition("PROGRESS_INTERVAL", "-progressinterval", ArgumentTypes.FLOAT, "How often to update the progress indicator. A value of 100 means that every 100 cases it updates the progress indicator."),
+  new ConfigDefinition("FILE_NAME_PREFIX", "-prefix", ArgumentTypes.STRING, "The prefix for the name of the generated files."),
+  new ConfigDefinition("INCLUDE_RECORD_COUNT_IN_FILE_NAME", "-verbosename", ArgumentTypes.BOOLEAN, "Whether to include the record count in the '-all' file name."),
+  new ConfigDefinition("DYNAMIC_ATTRS", "-dynamicattrs", ArgumentTypes.FLOAT, "Number of dynamically generated case attributes."),
+  new ConfigDefinition("UNIQUE_VALUES_FOR_DYNAMIC_ATTRS", "-uniquevalues", ArgumentTypes.FLOAT, "Number of unique values for each dynamically generated case attribute."),
+  new ConfigDefinition("MAX_VARIANTS", "-maxvariants", ArgumentTypes.FLOAT, "Maximum number of unique variants."),
+  new ConfigDefinition("MAX_SEQUENCES", "-maxsequences", ArgumentTypes.FLOAT, "Maximum number of unique event sequences."),
+  new ConfigDefinition("SHOW_SUMMARY", "-summary", ArgumentTypes.BOOLEAN, "Display data summary on the console."),
+]
 
 function loadAndSetUserConfigurations() {
   const args = process.argv.slice(2);
@@ -35,48 +95,13 @@ function loadAndSetUserConfigurations() {
     const arg = args[i];
     const nextArg = args[i + 1];
 
-    if (arg === "-cases" && i + 1 < args.length) {
-      config.NUMBER_OF_CASES = parseFloat(nextArg);
-    } else if (arg === "-timeframe" && i + 1 < args.length) {
-      config.TIMEFRAME_IN_YEARS = parseFloat(nextArg);
-    } else if (arg === "-format" && i + 1 < args.length) {
-      config.OUTPUT_FORMAT = nextArg.toLowerCase();
-    } else if (arg === "-sqlbatchsize" && i + 1 < args.length) {
-      config.BATCH_SIZE_INSERT_SQL = parseFloat(nextArg);
-    } else if (arg === "-minevents" && i + 1 < args.length) {
-      config.MIN_EVENTS = parseFloat(nextArg);
-    } else if (arg === "-maxevents" && i + 1 < args.length) {
-      config.MAX_EVENTS = parseFloat(nextArg);
-    } else if (arg === "-mindays" && i + 1 < args.length) {
-      config.MIN_DAYS_BETWEEN_EVENTS = parseFloat(nextArg);
-    } else if (arg === "-maxdays" && i + 1 < args.length) {
-      config.MAX_DAYS_BETWEEN_EVENTS = parseFloat(nextArg);
-    } else if (arg === "-minhours" && i + 1 < args.length) {
-      config.MIN_HOURS_BETWEEN_EVENTS = parseFloat(nextArg);
-    } else if (arg === "-maxhours" && i + 1 < args.length) {
-      config.MAX_HOURS_BETWEEN_EVENTS = parseFloat(nextArg);
-    } else if (arg === "-minminutes" && i + 1 < args.length) {
-      config.MIN_MINUTES_BETWEEN_EVENTS = parseFloat(nextArg);
-    } else if (arg === "-maxminutes" && i + 1 < args.length) {
-      config.MAX_MINUTES_BETWEEN_EVENTS = parseFloat(nextArg);
-    } else if (arg === "-progress" && i + 1 < args.length) {
-      config.SHOW_PROGRESS = (nextArg.toLowerCase() == "true")
-    } else if (arg === "-progressinterval" && i + 1 < args.length) {
-      config.PROGRESS_INTERVAL = parseFloat(nextArg)
-    } else if (arg === "-prefix" && i + 1 < args.length) {
-      config.FILE_NAME_PREFIX = nextArg;
-    } else if (arg === "-verbosename" && i + 1 < args.length) {
-      config.INCLUDE_RECORD_COUNT_IN_FILE_NAME = (nextArg.toLowerCase() == "true")
-    } else if (arg === "-dynamicattrs" && i + 1 < args.length) {
-      config.DYNAMIC_ATTRS = parseFloat(nextArg);
-    } else if (arg === "-uniquevalues" && i + 1 < args.length) {
-      config.UNIQUE_VALUES_FOR_DYNAMIC_ATTRS = parseFloat(nextArg);
-    } else if (arg === "-maxvariants" && i + 1 < args.length) {
-      config.MAX_VARIANTS = parseFloat(nextArg);
-    } else if (arg === "-maxsequences" && i + 1 < args.length) {
-      config.MAX_SEQUENCES = parseFloat(nextArg);
-    } else if (arg === "-summary" && i + 1 < args.length) {
-      config.SHOW_SUMMARY = (nextArg.toLowerCase() == "true")
+    if (i + 1 < args.length) {
+      for (let ci = 0; ci < configDefinitions.length; ci++) {
+        let defn = configDefinitions[ci];
+        if (arg === defn.argumentName) {
+          config[defn.configName] = defn.parse(nextArg);
+        }
+      }
     }
   }
 }
@@ -84,71 +109,9 @@ function loadAndSetUserConfigurations() {
 function printHelp() {
   console.log("\nUsage:");
   console.log(
-    "node app.js -cases [value] -timeframe [value] -format [value] -sqlbatchsize [value] -minevents [value] -maxevents [value] -mindays [value] -maxdays [value] -minhours [value] -maxhours [value] -minminutes [value] -maxminutes [value] -progress [value] -progressinterval [value] -dynamicattrs [value] -uniquevalues [value]\n"
+    `node app.js ${configDefinitions.reduce((accstr, defn) => { return accstr + defn.argumentName + " [value] " }, "")}\n`
   );
-  console.log(
-    `-cases: The number of cases to generate. (Default: ${config.NUMBER_OF_CASES})`
-  );
-  console.log(
-    `-timeframe: The amount of years to use as the timeframe of event dates. (Default: ${config.TIMEFRAME_IN_YEARS})`
-  );
-  console.log(
-    `-format: The format to use for the output (csv or sql). (Default: ${config.OUTPUT_FORMAT})`
-  );
-  console.log(
-    `-sqlbatchsize: The number rows to include with each SQL INSERT statement. (Default: ${config.BATCH_SIZE_INSERT_SQL})`
-  );
-  console.log(
-    `-minevents: The minimum number of events to create for each case. (Default: ${config.MIN_EVENTS})`
-  );
-  console.log(
-    `-maxevents: The minimum number of events to create for each case. (Default: ${config.MAX_EVENTS})`
-  );
-  console.log(
-    `-mindays: The minimum number of days between events. (Default: ${config.MIN_DAYS_BETWEEN_EVENTS})`
-  );
-  console.log(
-    `-maxdays: The maximum number of days between events. (Default: ${config.MAX_DAYS_BETWEEN_EVENTS})`
-  );
-  console.log(
-    `-minhours: The minimum number of hours between events. (Default: ${config.MIN_HOURS_BETWEEN_EVENTS})`
-  );
-  console.log(
-    `-maxhours: The maximum number of hours between events. (Default: ${config.MAX_HOURS_BETWEEN_EVENTS})`
-  );
-  console.log(
-    `-minminutes: The minimum number of minutes between events. (Default: ${config.MIN_MINUTES_BETWEEN_EVENTS})`
-  );
-  console.log(
-    `-maxminutes: The maximum number of minutes between events. (Default: ${config.MAX_MINUTES_BETWEEN_EVENTS})`
-  );
-  console.log(
-    `-progress: Enable/Disable a progress indicator. (Default: ${config.SHOW_PROGRESS})`
-  );
-  console.log(
-    `-progressinterval: How often to update the progress indicator. A value of 100 means that every 100 cases it updates the progress indicator. (Default: ${config.PROGRESS_INTERVAL})`
-  );
-  console.log(
-    `-prefix: The prefix for the name of the generated files. (Default: ${config.FILE_NAME_PREFIX})`
-  );
-  console.log(
-    `-verbosename: Whether to include the record count in the "-all" file name. (Default: ${config.INCLUDE_RECORD_COUNT_IN_FILE_NAME})`
-  );
-  console.log(
-    `-dynamicattrs: Number of dynamically generated case attributes. (Default: ${config.DYNAMIC_ATTRS})`
-  );
-  console.log(
-    `-uniquevalues: Number of unique values for each dynamically generated case attribute. (Default: ${config.UNIQUE_VALUES_FOR_DYNAMIC_ATTRS})`
-  );
-  console.log(
-    `-maxvariants: Maximum number of unique variants. (Default: None)`
-  );
-  console.log(
-    `-maxsequences: Maximum number of unique event sequences. (Default: None)`
-  );
-  console.log(
-    `-summary: Display data summary on the console. (Default: ${config.SHOW_SUMMARY})`
-  );
+  configDefinitions.forEach(defn => { defn.printHelpMessage() });
   console.log("\n");
 }
 
